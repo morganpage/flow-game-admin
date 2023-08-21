@@ -1,0 +1,86 @@
+[
+  {
+    "name": "Grungus",
+    "description": "A mushroom...",
+    "imageURL": "https://res.cloudinary.com/dlrreut0j/image/upload/v1691145232/HeroesOfTheFlow/Images/Mushroom_bsrsww.png",
+    "attack": 1,
+    "health": 1
+  },
+  {
+    "name": "Goofish",
+    "description": "A fish...",
+    "imageURL": "https://res.cloudinary.com/dlrreut0j/image/upload/v1691145232/HeroesOfTheFlow/Images/Fish_jldjun.png",
+    "attack": 2,
+    "health": 2
+  },
+  {
+    "name": "Spoak",
+    "description": "A tree...",
+    "imageURL": "https://res.cloudinary.com/dlrreut0j/image/upload/v1691145230/HeroesOfTheFlow/Images/Tree_ibmcot.png",
+    "attack": 1,
+    "health": 1
+  },
+  {
+    "name": "Sluchette",
+    "description": "A snail...",
+    "imageURL": "https://res.cloudinary.com/dlrreut0j/image/upload/v1691145230/HeroesOfTheFlow/Images/Snail_fp2qtl.png",
+    "attack": 1,
+    "health": 1
+  },
+  {
+    "name": "Carnifleur",
+    "description": "A plant...",
+    "imageURL": "https://res.cloudinary.com/dlrreut0j/image/upload/v1691145231/HeroesOfTheFlow/Images/Plant_fyjikt.png",
+    "attack": 1,
+    "health": 1
+  },
+  {
+    "name": "Turthole",
+    "description": "A turtle...",
+    "imageURL": "https://res.cloudinary.com/dlrreut0j/image/upload/v1691145230/HeroesOfTheFlow/Images/Turtle_esbw2x.png",
+    "attack": 1,
+    "health": 1
+  },
+  {
+    "name": "Nutter",
+    "description": "A squirrel...",
+    "imageURL": "https://res.cloudinary.com/dlrreut0j/image/upload/v1691145230/HeroesOfTheFlow/Images/Squirrel_vcdt9x.png",
+    "attack": 1,
+    "health": 1
+  },
+  {
+    "name": "Rocky",
+    "description": "A rock...",
+    "imageURL": "https://res.cloudinary.com/dlrreut0j/image/upload/v1691145230/HeroesOfTheFlow/Images/Rock_iabn27.png",
+    "attack": 1,
+    "health": 1
+  },
+  {
+    "name": "Boar",
+    "description": "A boar...",
+    "imageURL": "https://res.cloudinary.com/dlrreut0j/image/upload/v1692607056/HeroesOfTheFlow/Images/Boar_yhh21n.png",
+    "attack": 1,
+    "health": 1
+  },
+  {
+    "name": "Bear",
+    "description": "A bear...",
+    "imageURL": "https://res.cloudinary.com/dlrreut0j/image/upload/v1692607056/HeroesOfTheFlow/Images/Bear_alfgaq.png",
+    "attack": 1,
+    "health": 1
+  },
+  {
+    "name": "Bat",
+    "description": "A bat...",
+    "imageURL": "https://res.cloudinary.com/dlrreut0j/image/upload/v1692607185/HeroesOfTheFlow/Images/Bat_i5kkcl.png",
+    "attack": 1,
+    "health": 1
+  },
+  {
+    "name": "Golem",
+    "description": "A golem...",
+    "imageURL": "https://res.cloudinary.com/dlrreut0j/image/upload/v1692607197/HeroesOfTheFlow/Images/Golem_xpctzt.png",
+    "attack": 1,
+    "health": 1
+  }
+]
