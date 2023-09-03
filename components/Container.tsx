@@ -6,7 +6,6 @@ export default function Container() {
   return (
     <div className={containerStyles.container}>
       <Minions />
-      <Game />
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import * as fcl from "@onflow/fcl";
 import Login from "../cadence/transactions/HOTF_login.cdc";
 import Draw from "../cadence/transactions/HOTF_draw.cdc";
-import GetName from "../cadence/scripts/HOTF_get_name.cdc";
+import GetName from "../cadence/scripts/HOTF_getName.cdc";
 import { useEffect, useState } from "react";
 import useCurrentUser from "../hooks/useCurrentUser";
 

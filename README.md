@@ -1,3 +1,13 @@
+# Heroes of the Flow
+## Description
+
+## Testing
+npm test
+
+## Running the admin panel
+npm run dev:local
+
+
 This is a scaffold for an FCL NextJS Dapp on the Flow Blockchain.
 
 ## Features Provided

@@ -1,10 +1,10 @@
 import * as fcl from "@onflow/fcl";
 import { useEffect, useState } from "react";
-import gamedb_get_minions from "../cadence/scripts/HOTF_get_minions.cdc";
-import SetMinion from "../cadence/transactions/SetMinion.cdc";
-import SetMinionsCDC from "../cadence/transactions/SetMinions.cdc";
-import DeleteMinion from "../cadence/transactions/DeleteMinion.cdc";
-import AddMinion from "../cadence/transactions/AddMinion.cdc";
+import getMinionsScript from "../cadence/scripts/HOTF_getMinions.cdc";
+import setMinionTransaction from "../cadence/transactions/HOTF_setMinion.cdc";
+import setMinionsTransaction from "../cadence/transactions/HOTF_setMinions.cdc";
+import deleteMinionTransaction from "../cadence/transactions/HOTF_deleteMinion.cdc";
+import addMinionTransaction from "../cadence/transactions/HOTF_addMinion.cdc";
 import useConfig from "../hooks/useConfig";
 import { createExplorerTransactionLink } from "../helpers/links";
 import minionData from "../data/minions.json";
@@ -41,7 +41,7 @@ export default function Minions() {
 
   const queryChain = async () => {
     const res = await fcl.query({
-      cadence: gamedb_get_minions,
+      cadence: getMinionsScript,
     });
     console.log("Minions: ", res);
     res.sort((a, b) => a.name.localeCompare(b.name)); //Sort alphabetically for now
@@ -74,7 +74,7 @@ export default function Minions() {
     let healths = minionData.map((minion) => minion.health);
 
     const transactionId = await fcl.mutate({
-      cadence: SetMinionsCDC,
+      cadence: setMinionsTransaction,
       args: (arg, t) => [arg(names, t.Array(t.String)), arg(descriptions, t.Array(t.String)), arg(imageURLs, t.Array(t.String)), arg(attacks, t.Array(t.UInt8)), arg(healths, t.Array(t.UInt8))],
     });
     setLastTransactionId(transactionId);
@@ -82,7 +82,7 @@ export default function Minions() {
 
   const setMinion = async (minion) => {
     const transactionId = await fcl.mutate({
-      cadence: SetMinion,
+      cadence: setMinionTransaction,
       args: (arg, t) => [arg(minion.name, t.String), arg(minion.description, t.String), arg(minion.imageURL, t.String), arg(minion.attack, t.UInt8), arg(minion.health, t.UInt8)],
     });
     setLastTransactionId(transactionId);
@@ -90,7 +90,7 @@ export default function Minions() {
 
   const deleteMinion = async (minionName) => {
     const transactionId = await fcl.mutate({
-      cadence: DeleteMinion,
+      cadence: deleteMinionTransaction,
       args: (arg, t) => [arg(minionName, t.String)],
     });
     setLastTransactionId(transactionId);
@@ -100,7 +100,7 @@ export default function Minions() {
     e.preventDefault();
     const minionName = e.target.name.value;
     const transactionId = await fcl.mutate({
-      cadence: AddMinion,
+      cadence: addMinionTransaction,
       args: (arg, t) => [arg(minionName, t.String)],
     });
     setLastTransactionId(transactionId);

@@ -1,64 +1,126 @@
 import Test
-import "GameDB"
 
-pub let gameDB = GameDB()
+pub let pathHOTF = "../contracts/emulator-account/HOTF.cdc"
+//Scripts
+pub let getMinions = "../scripts/HOTF_getMinions_test.cdc"
+pub let getMana = "../scripts/HOTF_getMana.cdc"
+pub let getName = "../scripts/HOTF_getName.cdc"
+//Transactions
+pub let addMinion = "../transactions/HOTF_addMinion.cdc"
+pub let draw = "../transactions/HOTF_draw.cdc"
+pub let login = "../transactions/HOTF_login.cdc"
+
 
 pub let blockchain = Test.newEmulatorBlockchain()
 pub let admin = blockchain.createAccount()
 pub let user = blockchain.createAccount()
 
 pub fun setup() {
-    log("Setup")
     blockchain.useConfiguration(Test.Configuration({
-        "GameDB": admin.address
+        "HOTF": admin.address
     }))
-    let code = Test.readFile("../contracts/GameDB.cdc")
+
+    let code = Test.readFile(pathHOTF)
     let err = blockchain.deployContract(
-        name: "GameDB",
+        name: "HOTF",
         code: code,
         account: admin,
         arguments: []
     )
+    log("Admin address:".concat(admin.address.toString()))
+    log("User address:".concat(user.address.toString()))
     Test.expect(err, Test.beNil())
 }
 
 pub fun testGetMinions() {
-    let minions = gameDB.getMinions()
-    //log(minions)
-    Test.assert(minions.length > 0, message:"No minions found")
-}
-
-pub fun testGetMinions2() {
-    let code = Test.readFile("../scripts/gamedb_get_minions_test.cdc")
-    let scriptResult = blockchain.executeScript(code, [])
-    let totalMinions = (scriptResult.returnValue as! Int?)!
-    //log(totalMinions)
+    var script = Test.readFile(getMinions)
+    let scriptResult: Test.ScriptResult = blockchain.executeScript(script, [])
     Test.expect(scriptResult, Test.beSucceeded())
-    Test.assert(totalMinions > 0, message:"No minions found")
+    let returnValue: Int = scriptResult.returnValue! as! Int
+    Test.assertEqual(3, returnValue)
 }
 
-pub fun testAddMinion() {
-    var code = Test.readFile("../scripts/gamedb_get_minions_test.cdc")
-    var scriptResult = blockchain.executeScript(code, [])
-    var totalMinions = (scriptResult.returnValue as! Int?)!
-    log(totalMinions)
+pub fun testAdd30Minions() {
+    let code = Test.readFile(addMinion)
+    var x = 0
+    while x < 30 {
+        let tx = Test.Transaction(
+            code: code,
+            authorizers: [admin.address],
+            signers: [admin],
+            arguments: ["NewMinion ".concat(x.toString())]
+        )
+        let result = blockchain.executeTransaction(tx)
+        //log(result)
+        Test.expect(result.error, Test.beNil())
+        x = x + 1
+        Test.expect(result.error, Test.beNil())
+    }
+}
 
-    code = Test.readFile("../transactions/AddMinion.cdc")
+//Must do this first
+pub fun testLogin() {
+    let code = Test.readFile(login)
+    let tx = Test.Transaction(
+        code: code,
+        authorizers: [user.address],
+        signers: [user],
+        arguments: ["Bob"]
+    )
+    let result = blockchain.executeTransaction(tx)
+    //log(result)
+}
+
+pub fun testAddMinionByAdmin() {
+    let code = Test.readFile(addMinion)
+    let tx = Test.Transaction(
+        code: code,
+        authorizers: [admin.address],
+        signers: [admin],
+        arguments: ["NewMinion"]
+    )
+    let result = blockchain.executeTransaction(tx)
+    //log(result)
+    Test.expect(result.error, Test.beNil())
+}
+
+
+pub fun testAddMinionByUser() { //Should fail, not an admin
+    let code = Test.readFile(addMinion)
     let tx = Test.Transaction(
         code: code,
         authorizers: [user.address],
         signers: [user],
         arguments: ["NewMinion"]
     )
-    let txResult = blockchain.executeTransaction(tx)
-    //log(txResult)
-    Test.expect(txResult, Test.beSucceeded())
-
-    code = Test.readFile("../scripts/gamedb_get_minions_test.cdc")
-    scriptResult = blockchain.executeScript(code, [])
-    totalMinions = (scriptResult.returnValue as! Int?)!
-    log(totalMinions)
-
-
+    let result = blockchain.executeTransaction(tx)
+    Test.expect(result, Test.beFailed())
 }
 
+pub fun testGetName() {
+    var script = Test.readFile(getName)
+    let scriptResult: Test.ScriptResult = blockchain.executeScript(script, [user.address])
+    Test.expect(scriptResult, Test.beSucceeded())
+    let returnValue: String = scriptResult.returnValue! as! String
+    Test.assertEqual("Bob", returnValue)
+}
+
+pub fun testGetMana() {
+    var script = Test.readFile(getMana)
+    let scriptResult: Test.ScriptResult = blockchain.executeScript(script, [user.address])
+    Test.expect(scriptResult, Test.beSucceeded())
+    let returnValue: UInt8 = scriptResult.returnValue! as! UInt8
+    Test.assertEqual(11 as UInt8, returnValue)
+}
+
+
+pub fun testDraw(){
+    let code = Test.readFile(draw)
+    let tx = Test.Transaction(
+        code: code,
+        authorizers: [user.address],
+        signers: [user],
+        arguments: []
+    )
+    let result = blockchain.executeTransaction(tx)
+}

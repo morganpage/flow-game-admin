@@ -1,6 +1,8 @@
 pub contract HOTF {
+    //Admin paths
     pub let AdminStoragePath: StoragePath
     pub let AdminPrivatePath: PrivatePath
+    //UserGameState paths
     pub let UserGameStateStoragePath: StoragePath
     pub let UserGameStatePublicPath: PublicPath
     pub let UserGameStatePrivatePath: PrivatePath
@@ -93,12 +95,14 @@ pub contract HOTF {
     // private interface, only accessible to owner and game contract
     pub resource interface UserGameStatePrivateInterface
     {
-        pub fun GetName() : String
+      pub var mana: UInt8
+      pub fun getName() : String
     }
 
     pub resource interface UserGameStatePublicInterface
     {
-        pub fun GetName() : String
+      pub var mana: UInt8
+      pub fun getName() : String
     }
 
     pub resource UserGameState : UserGameStatePublicInterface,UserGameStatePrivateInterface { //This contains the local state of the game for each user
@@ -114,13 +118,15 @@ pub contract HOTF {
 
       pub fun draw() : [Minion] { //Draw random cards from the deck
         self.mana = self.mana - 1
+        log("self.mana:".concat(self.mana.toString()))
         var drawnMinions: [Minion] = []
         var availableMinions: [Minion] = self.minions
         var i = 0
         while i < 3 && availableMinions.length > 0 {
             //let randomIndex =  Int(unsafeRandom()) % (availableMinions.length)
             let randomIndex = i % (availableMinions.length) //Change when unsafeRandom is fixed
-            log(randomIndex)
+            log("randomIndex:".concat(randomIndex.toString()))
+            log("availableMinions.length:".concat(availableMinions.length.toString()))
             let randomMinion = availableMinions[randomIndex]
             drawnMinions.append(randomMinion)
             availableMinions.remove(at: randomIndex)
@@ -129,7 +135,7 @@ pub contract HOTF {
         return drawnMinions
       }
 
-      pub fun GetName() : String
+      pub fun getName() : String
       {
           return self.name
       }

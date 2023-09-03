@@ -1,8 +1,6 @@
 import "HOTF"
 
-// This transaction...
-
-transaction {
+transaction(name: String) {
   let account: Address
 
     prepare(acct: AuthAccount)  {
@@ -12,7 +10,7 @@ transaction {
       if refUserGameState == nil
       {
         log("Creating User Account:  ".concat(self.account.toString()))
-        acct.save(<-HOTF.CreateUserGameState(name: "Bob"), to: HOTF.UserGameStateStoragePath)
+        acct.save(<-HOTF.CreateUserGameState(name: name), to: HOTF.UserGameStateStoragePath)
         refUserGameState = acct.borrow<&HOTF.UserGameState>(from: HOTF.UserGameStateStoragePath)
         acct.link<&HOTF.UserGameState{HOTF.UserGameStatePrivateInterface}>(HOTF.UserGameStatePrivatePath, target:HOTF.UserGameStateStoragePath)
         acct.link<&HOTF.UserGameState{HOTF.UserGameStatePublicInterface}>(HOTF.UserGameStatePublicPath, target:HOTF.UserGameStateStoragePath)
