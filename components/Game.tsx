@@ -1,38 +1,27 @@
 import * as fcl from "@onflow/fcl";
-import Login from "../cadence/transactions/HOTF_login.cdc";
-import Draw from "../cadence/transactions/HOTF_draw.cdc";
-import GetName from "../cadence/scripts/HOTF_getName.cdc";
+import loginTransaction from "../cadence/transactions/HOTF_login.cdc";
+import drawTransaction from "../cadence/transactions/HOTF_draw.cdc";
 import { useEffect, useState } from "react";
 import useCurrentUser from "../hooks/useCurrentUser";
+import useGameState from "../hooks/useGameState";
+import Card from "./Card";
 
 export default function Game() {
-  const user = useCurrentUser();
-  const [name, setName] = useState<string>();
+  const [name, setName] = useState<string>("");
   const [lastTransactionId, setLastTransactionId] = useState<string>();
   const [transactionStatus, setTransactionStatus] = useState<number>();
-
-  useEffect(() => {
-    if (user && user.addr) getName();
-  }, [user]);
-
+  const gameState = useGameState(lastTransactionId);
   const login = async () => {
     const transactionId = await fcl.mutate({
-      cadence: Login,
-      args: (arg, t) => [],
+      cadence: loginTransaction,
+      args: (arg, t) => [arg(name, t.String)],
     });
     setLastTransactionId(transactionId);
   };
-  const getName = async () => {
-    const res = await fcl.query({
-      cadence: GetName,
-      args: (arg, t) => [arg(user.addr, t.Address)],
-    });
-    setName(res);
-  };
-
   const draw = async () => {
+    console.log("Draw");
     const transactionId = await fcl.mutate({
-      cadence: Draw,
+      cadence: drawTransaction,
       args: (arg, t) => [],
     });
     setLastTransactionId(transactionId);
@@ -40,14 +29,49 @@ export default function Game() {
 
   return (
     <div>
-      <h2>Game</h2>
-      <p>{"Hi " + name}</p>
+      {!gameState.name && (
+        <div>
+          <h2>First you must log in to the game</h2>
+          <button onClick={() => login()}>Login to Game</button>
+          <input name="name" value={name} type="text" onChange={(e) => setName(e.target.value)} placeholder="Type Name" />
+        </div>
+      )}
+      {gameState.name && (
+        <div>
+          <h2>Welcome back {gameState.name}, let's carry on with the game</h2>
+          <p>Mana: {gameState.mana}</p>
+          <p>Hand: </p>
+          {gameState.hand && gameState.hand.map((minion: any) => <Card key={minion.name} minion={minion} />)}
+          <button onClick={() => draw()}>Draw</button>
+        </div>
+      )}
+
+      {/* <p>{"Hi " + name}</p>
       <p>{user.addr}</p>
       <button onClick={() => getName()}>Get Name</button>
       <button onClick={() => login()}>Login</button>
       <button onClick={() => draw()}>Draw</button>
       <h4>Latest Transaction ID: {lastTransactionId}</h4>
-      <h4>Latest Transaction Status: {transactionStatus}</h4>
+      <h4>Latest Transaction Status: {transactionStatus}</h4> */}
+
+      <div>
+        {/* <h2>Mutate the Chain</h2>
+        {!isEmulator(network) && (
+          <h4>
+            Latest Transaction ID:{" "}
+            <a
+              className={elementStyles.link}
+              onClick={() => {
+                openExplorerLink(lastTransactionId, network);
+              }}
+            >
+              {lastTransactionId}
+            </a>
+          </h4>
+        )} */}
+        <h4>Latest Transaction ID: {lastTransactionId}</h4>
+        <h4>Latest Transaction Status: {transactionStatus}</h4>
+      </div>
     </div>
   );
 }

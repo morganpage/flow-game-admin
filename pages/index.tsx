@@ -18,7 +18,7 @@ export default function Home() {
 
       <main className={styles.main}>
         <h1 className={styles.title}>
-          <a href="https://twitter.com/heroesoftheflow">Heroes of the Flow</a>
+          <Link href="/">Heroes of the Flow</Link>
         </h1>
         <p className={styles.description}>Admin Panel</p>
 

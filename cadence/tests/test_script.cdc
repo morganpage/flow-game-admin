@@ -5,6 +5,7 @@ pub let pathHOTF = "../contracts/emulator-account/HOTF.cdc"
 pub let getMinions = "../scripts/HOTF_getMinions_test.cdc"
 pub let getMana = "../scripts/HOTF_getMana.cdc"
 pub let getName = "../scripts/HOTF_getName.cdc"
+pub let getHand = "../scripts/HOTF_getHand_test.cdc"
 //Transactions
 pub let addMinion = "../transactions/HOTF_addMinion.cdc"
 pub let draw = "../transactions/HOTF_draw.cdc"
@@ -123,4 +124,13 @@ pub fun testDraw(){
         arguments: []
     )
     let result = blockchain.executeTransaction(tx)
+}
+
+pub fun testGetHand() {
+    var script = Test.readFile(getHand)
+    let scriptResult: Test.ScriptResult = blockchain.executeScript(script, [user.address])
+    Test.expect(scriptResult, Test.beSucceeded())
+    let returnValue: Int = scriptResult.returnValue! as! Int
+    log(returnValue)
+    Test.assertEqual(3, returnValue)
 }

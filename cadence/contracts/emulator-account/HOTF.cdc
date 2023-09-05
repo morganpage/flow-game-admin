@@ -96,43 +96,47 @@ pub contract HOTF {
     pub resource interface UserGameStatePrivateInterface
     {
       pub var mana: UInt8
+      pub var hand: [Minion] //Minions in the user's hand
       pub fun getName() : String
     }
 
     pub resource interface UserGameStatePublicInterface
     {
       pub var mana: UInt8
+      pub var hand: [Minion] //Minions in the user's hand
       pub fun getName() : String
     }
 
     pub resource UserGameState : UserGameStatePublicInterface,UserGameStatePrivateInterface { //This contains the local state of the game for each user
       pub var name: String
       pub var minions: [Minion] //Minions available to the user
+      pub var hand: [Minion] //Minions in the user's hand
       pub var mana: UInt8
+      pub let maxHandSize: UInt8
 
       init(name: String) {
         self.name = name
         self.minions = HOTF.getMinions() //For the moment the user gets all the minions, needs to be changed to only get the ones they have
+        self.hand = [] //Hand is empty at the start of the game
         self.mana = 11 //First draw will reduce this to 10
+        self.maxHandSize = 3
       }
 
-      pub fun draw() : [Minion] { //Draw random cards from the deck
+      pub fun draw() { //Draw random cards from the deck
+        log("draw")
         self.mana = self.mana - 1
         log("self.mana:".concat(self.mana.toString()))
-        var drawnMinions: [Minion] = []
-        var availableMinions: [Minion] = self.minions
-        var i = 0
-        while i < 3 && availableMinions.length > 0 {
+        var i: UInt8 = 0
+        while i < self.maxHandSize && self.minions.length > 0 {
             //let randomIndex =  Int(unsafeRandom()) % (availableMinions.length)
-            let randomIndex = i % (availableMinions.length) //Change when unsafeRandom is fixed
+            let randomIndex = i % UInt8(self.minions.length) //Change when unsafeRandom is fixed in emulator
             log("randomIndex:".concat(randomIndex.toString()))
-            log("availableMinions.length:".concat(availableMinions.length.toString()))
-            let randomMinion = availableMinions[randomIndex]
-            drawnMinions.append(randomMinion)
-            availableMinions.remove(at: randomIndex)
+            log("availableMinions.length:".concat(self.minions.length.toString()))
+            let randomMinion = self.minions[randomIndex]
+            self.hand.append(randomMinion)
+            self.minions.remove(at: randomIndex)
             i = i + 1
         }
-        return drawnMinions
       }
 
       pub fun getName() : String

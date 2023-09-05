@@ -8,7 +8,7 @@ export default function useConfig(): { network: string | null } {
     async function getConfig() {
       const flowNetwork = await fcl.config.get("flow.network");
       setNetwork(flowNetwork);
-      //fcl.config.put("fcl.limit", 1000);
+      // fcl.config.put("fcl.limit", 1000);
     }
     getConfig();
   }, []);

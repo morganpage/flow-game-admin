@@ -12,4 +12,5 @@ config({
   "discovery.wallet": `https://fcl-discovery.onflow.org/${flowNetwork}/authn`,
   "app.detail.icon": "https://avatars.githubusercontent.com/u/62387156?v=4",
   "app.detail.title": "Heroes of the Flow",
+  "fcl.limit": 1000,
 }).load({ flowJSON });
