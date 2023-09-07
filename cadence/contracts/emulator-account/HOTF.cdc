@@ -34,6 +34,7 @@ pub contract HOTF {
         pub var extra: String? //Json string for extra data
         pub var item: Item?
         pub var team: UInt8 //0-Friend; 1-Enemy
+        pub(set) var hold: Bool
 
         init(name:String,description:String,imageURL:String,attack:UInt8,health:UInt8,trigger:Trigger?,ability:Ability?,extra:String?,item:Item?,team:UInt8) {
             self.name = name
@@ -46,6 +47,7 @@ pub contract HOTF {
             self.extra = extra
             self.item = item
             self.team = team
+            self.hold = false
         }
     }
 
@@ -62,9 +64,6 @@ pub contract HOTF {
             return newGameState
         }
         return userGameState!
-    }
-    pub fun login2(): @UserGameState{
-      return <- create UserGameState(name: "test")
     }
 
     pub resource Administrator {
@@ -122,14 +121,31 @@ pub contract HOTF {
         self.maxHandSize = 3
       }
 
+      pub fun hold(handIndex: Int,hold: Bool){
+        if handIndex >= self.hand.length {
+            return
+        }
+        self.hand[handIndex].hold = hold
+      }
+
       pub fun draw() { //Draw random cards from the deck
         log("draw")
         self.mana = self.mana - 1
         log("self.mana:".concat(self.mana.toString()))
-        var i: UInt8 = 0
-        while i < self.maxHandSize && self.minions.length > 0 {
+        var i: Int = 0
+        //Clear any non-held cards from the hand
+        i = (self.hand.length) - 1
+        while i >= 0 {
+          log(i.toString())
+            if !self.hand[i].hold {
+                self.hand.remove(at: i)
+            }
+            i = i - 1
+        }
+        i=0
+        while UInt8(self.hand.length) < self.maxHandSize && self.minions.length > 0 {
             //let randomIndex =  Int(unsafeRandom()) % (availableMinions.length)
-            let randomIndex = i % UInt8(self.minions.length) //Change when unsafeRandom is fixed in emulator
+            let randomIndex = i % (self.minions.length) //Change when unsafeRandom is fixed in emulator
             log("randomIndex:".concat(randomIndex.toString()))
             log("availableMinions.length:".concat(self.minions.length.toString()))
             let randomMinion = self.minions[randomIndex]
@@ -137,6 +153,17 @@ pub contract HOTF {
             self.minions.remove(at: randomIndex)
             i = i + 1
         }
+        log("self.hand.length:".concat(self.hand.length.toString()))
+        // while i < self.maxHandSize && self.minions.length > 0 {
+        //     //let randomIndex =  Int(unsafeRandom()) % (availableMinions.length)
+        //     let randomIndex = i % UInt8(self.minions.length) //Change when unsafeRandom is fixed in emulator
+        //     log("randomIndex:".concat(randomIndex.toString()))
+        //     log("availableMinions.length:".concat(self.minions.length.toString()))
+        //     let randomMinion = self.minions[randomIndex]
+        //     self.hand.append(randomMinion)
+        //     self.minions.remove(at: randomIndex)
+        //     i = i + 1
+        // }
       }
 
       pub fun getName() : String

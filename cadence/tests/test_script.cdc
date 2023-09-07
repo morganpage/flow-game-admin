@@ -9,12 +9,15 @@ pub let getHand = "../scripts/HOTF_getHand_test.cdc"
 //Transactions
 pub let addMinion = "../transactions/HOTF_addMinion.cdc"
 pub let draw = "../transactions/HOTF_draw.cdc"
+pub let hold = "../transactions/HOTF_hold.cdc"
 pub let login = "../transactions/HOTF_login.cdc"
 
 
 pub let blockchain = Test.newEmulatorBlockchain()
 pub let admin = blockchain.createAccount()
 pub let user = blockchain.createAccount()
+
+pub let heldMinion = nil
 
 pub fun setup() {
     blockchain.useConfiguration(Test.Configuration({
@@ -127,6 +130,60 @@ pub fun testDraw(){
 }
 
 pub fun testGetHand() {
+    var script = Test.readFile(getHand)
+    let scriptResult: Test.ScriptResult = blockchain.executeScript(script, [user.address])
+    Test.expect(scriptResult, Test.beSucceeded())
+    let returnValue: Int = scriptResult.returnValue! as! Int
+    log(returnValue)
+    Test.assertEqual(3, returnValue)
+}
+
+pub fun testDraw2(){
+    let code = Test.readFile(draw)
+    let tx = Test.Transaction(
+        code: code,
+        authorizers: [user.address],
+        signers: [user],
+        arguments: []
+    )
+    let result = blockchain.executeTransaction(tx)
+}
+
+pub fun testGetHand2() {
+    var script = Test.readFile(getHand)
+    let scriptResult: Test.ScriptResult = blockchain.executeScript(script, [user.address])
+    Test.expect(scriptResult, Test.beSucceeded())
+    let returnValue: Int = scriptResult.returnValue! as! Int
+    log(returnValue)
+    Test.assertEqual(3, returnValue)
+}
+
+
+pub fun testHold() {
+    let code = Test.readFile(hold)
+    let tx = Test.Transaction(
+        code: code,
+        authorizers: [user.address],
+        signers: [user],
+        arguments: [0,true]
+    )
+    let result = blockchain.executeTransaction(tx)
+    log(result)
+    //Test.expect(result, Test.beFailed())
+}
+
+pub fun testDraw3(){
+    let code = Test.readFile(draw)
+    let tx = Test.Transaction(
+        code: code,
+        authorizers: [user.address],
+        signers: [user],
+        arguments: []
+    )
+    let result = blockchain.executeTransaction(tx)
+}
+
+pub fun testGetHand3() {
     var script = Test.readFile(getHand)
     let scriptResult: Test.ScriptResult = blockchain.executeScript(script, [user.address])
     Test.expect(scriptResult, Test.beSucceeded())

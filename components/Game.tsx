@@ -1,8 +1,5 @@
-import * as fcl from "@onflow/fcl";
-import loginTransaction from "../cadence/transactions/HOTF_login.cdc";
-import drawTransaction from "../cadence/transactions/HOTF_draw.cdc";
-import { useEffect, useState } from "react";
-import useCurrentUser from "../hooks/useCurrentUser";
+import { loginMethod, drawMethod, restartMethod } from "../utils/contractMethods";
+import { useState } from "react";
 import useGameState from "../hooks/useGameState";
 import Card from "./Card";
 
@@ -11,28 +8,14 @@ export default function Game() {
   const [lastTransactionId, setLastTransactionId] = useState<string>();
   const [transactionStatus, setTransactionStatus] = useState<number>();
   const gameState = useGameState(lastTransactionId);
-  const login = async () => {
-    const transactionId = await fcl.mutate({
-      cadence: loginTransaction,
-      args: (arg, t) => [arg(name, t.String)],
-    });
-    setLastTransactionId(transactionId);
-  };
-  const draw = async () => {
-    console.log("Draw");
-    const transactionId = await fcl.mutate({
-      cadence: drawTransaction,
-      args: (arg, t) => [],
-    });
-    setLastTransactionId(transactionId);
-  };
 
   return (
     <div>
+      <button onClick={() => restartMethod(name, setLastTransactionId, setTransactionStatus)}>Restart Game</button>
       {!gameState.name && (
         <div>
           <h2>First you must log in to the game</h2>
-          <button onClick={() => login()}>Login to Game</button>
+          <button onClick={() => loginMethod(name, setLastTransactionId, setTransactionStatus)}>Login to Game</button>
           <input name="name" value={name} type="text" onChange={(e) => setName(e.target.value)} placeholder="Type Name" />
         </div>
       )}
@@ -40,9 +23,9 @@ export default function Game() {
         <div>
           <h2>Welcome back {gameState.name}, let's carry on with the game</h2>
           <p>Mana: {gameState.mana}</p>
+          <button onClick={() => drawMethod(setLastTransactionId, setTransactionStatus)}>Draw</button>
           <p>Hand: </p>
-          {gameState.hand && gameState.hand.map((minion: any) => <Card key={minion.name} minion={minion} />)}
-          <button onClick={() => draw()}>Draw</button>
+          <div style={{ display: "flex" }}>{gameState.hand && gameState.hand.map((minion: any, index: Number) => <Card key={minion.name} minion={minion} index={index} setTransactionId={setLastTransactionId} setTransactionStatus={setTransactionStatus} />)}</div>
         </div>
       )}
 
@@ -69,7 +52,7 @@ export default function Game() {
             </a>
           </h4>
         )} */}
-        <h4>Latest Transaction ID: {lastTransactionId}</h4>
+        <h4>Latest Transaction ID: {lastTransactionId && lastTransactionId.substring(0, 10)}...</h4>
         <h4>Latest Transaction Status: {transactionStatus}</h4>
       </div>
     </div>

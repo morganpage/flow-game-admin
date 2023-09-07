@@ -1,13 +1,9 @@
 import * as fcl from "@onflow/fcl";
 import { useEffect, useState } from "react";
 import getMinionsScript from "../cadence/scripts/HOTF_getMinions.cdc";
-import setMinionTransaction from "../cadence/transactions/HOTF_setMinion.cdc";
-import setMinionsTransaction from "../cadence/transactions/HOTF_setMinions.cdc";
-import deleteMinionTransaction from "../cadence/transactions/HOTF_deleteMinion.cdc";
-import addMinionTransaction from "../cadence/transactions/HOTF_addMinion.cdc";
 import useConfig from "../hooks/useConfig";
 import { createExplorerTransactionLink } from "../helpers/links";
-import minionData from "../data/minions.json";
+import { addMinion, setMinion, deleteMinion, importMinions } from "../utils/contractMethods";
 
 export default function Minions() {
   const [minions, setMinions] = useState<any[]>([]);
@@ -65,45 +61,9 @@ export default function Minions() {
 
   const openExplorerLink = (transactionId, network) => window.open(createExplorerTransactionLink({ network, transactionId }), "_blank");
 
-  const importMinions = async () => {
-    console.log(minionData);
-    let names = minionData.map((minion) => minion.name);
-    let descriptions = minionData.map((minion) => minion.description);
-    let imageURLs = minionData.map((minion) => minion.imageURL);
-    let attacks = minionData.map((minion) => minion.attack);
-    let healths = minionData.map((minion) => minion.health);
-
-    const transactionId = await fcl.mutate({
-      cadence: setMinionsTransaction,
-      args: (arg, t) => [arg(names, t.Array(t.String)), arg(descriptions, t.Array(t.String)), arg(imageURLs, t.Array(t.String)), arg(attacks, t.Array(t.UInt8)), arg(healths, t.Array(t.UInt8))],
-    });
-    setLastTransactionId(transactionId);
-  };
-
-  const setMinion = async (minion) => {
-    const transactionId = await fcl.mutate({
-      cadence: setMinionTransaction,
-      args: (arg, t) => [arg(minion.name, t.String), arg(minion.description, t.String), arg(minion.imageURL, t.String), arg(minion.attack, t.UInt8), arg(minion.health, t.UInt8)],
-    });
-    setLastTransactionId(transactionId);
-  };
-
-  const deleteMinion = async (minionName) => {
-    const transactionId = await fcl.mutate({
-      cadence: deleteMinionTransaction,
-      args: (arg, t) => [arg(minionName, t.String)],
-    });
-    setLastTransactionId(transactionId);
-  };
-
-  const addMinion = async (e: any) => {
+  const addMinionHelper = async (e: any) => {
     e.preventDefault();
-    const minionName = e.target.name.value;
-    const transactionId = await fcl.mutate({
-      cadence: addMinionTransaction,
-      args: (arg, t) => [arg(minionName, t.String)],
-    });
-    setLastTransactionId(transactionId);
+    addMinion(e.target.name.value, setLastTransactionId, setTransactionStatus);
     e.target.name.value = "";
   };
 
@@ -119,13 +79,13 @@ export default function Minions() {
     <div>
       <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "20px" }}>
         <h2>Minions</h2>
-        <button style={{ height: "40px" }} onClick={importMinions}>
+        <button style={{ height: "40px" }} onClick={() => importMinions(setLastTransactionId, setTransactionStatus)}>
           Import Minions
         </button>
       </div>
       {/* <img src="https://drive.google.com/uc?export=view&id=19nLGECEHIBo3H-aT_vvZLetOa-TvCqq8" alt="Flow Logo" className={containerStyles.logo} /> */}
       <div>
-        <form onSubmit={addMinion}>
+        <form onSubmit={addMinionHelper}>
           <input type="text" id="name" placeholder="Add a Minion" />
           <button type="submit">+</button>
         </form>
@@ -160,11 +120,12 @@ export default function Minions() {
                 <td>
                   <input name="imageURL" value={minion.imageURL} type="text" onChange={(e) => onChangeInput(e, minion.name)} placeholder="Type Image URL" />
                 </td>
+                <p>{minion.hold.toString()}</p>
                 <td>
-                  <button onClick={() => setMinion(minion)} disabled={!minion.changed}>
+                  <button onClick={() => setMinion(minion, setLastTransactionId, setTransactionStatus)} disabled={!minion.changed}>
                     Update
                   </button>
-                  <button onClick={() => deleteMinion(minion.name)}>x</button>
+                  <button onClick={() => deleteMinion(minion.name, setLastTransactionId, setTransactionStatus)}>x</button>
                 </td>
               </tr>
             ))}
