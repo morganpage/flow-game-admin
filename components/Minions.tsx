@@ -39,7 +39,6 @@ export default function Minions() {
     const res = await fcl.query({
       cadence: getMinionsScript,
     });
-    console.log("Minions: ", res);
     res.sort((a, b) => a.name.localeCompare(b.name)); //Sort alphabetically for now
     setMinions(res);
   };

@@ -42,12 +42,8 @@ export async function sign(payloadHex: string, privateKeyHex: string) {
 
   const bufferEndianness = "be";
   const ecSignatureN = 32;
-  console.log("ecSignature", ecSignature);
-  let test = ecSignature.r.toBuffer(bufferEndianness, ecSignatureN);
-  console.log("test", test);
-  let test2 = ecSignature.s.toBuffer(bufferEndianness, ecSignatureN);
-  console.log("test2", test2);
-  const signature = Buffer.concat([ecSignature.r.toBuffer(bufferEndianness, ecSignatureN), ecSignature.s.toBuffer(bufferEndianness, ecSignatureN)]).toString("hex");
+  //const signature = Buffer.concat([ecSignature.r.toBuffer(bufferEndianness, ecSignatureN), ecSignature.s.toBuffer(bufferEndianness, ecSignatureN)]).toString("hex");
+  const signature = Buffer.concat([ecSignature.r.toArrayLike(Buffer, bufferEndianness, ecSignatureN), ecSignature.s.toArrayLike(Buffer, bufferEndianness, ecSignatureN)]).toString("hex");
 
   return signature;
 }
