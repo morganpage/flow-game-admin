@@ -1,54 +1,18 @@
-import * as fcl from "@onflow/fcl";
 import { useEffect, useState } from "react";
-import getMinionsScript from "../cadence/scripts/HOTF_getMinions.cdc";
-import useConfig from "../hooks/useConfig";
-import { createExplorerTransactionLink } from "../helpers/links";
 import { addMinion, setMinion, deleteMinion, importMinions } from "../utils/contractMethods";
+import useMinions from "../hooks/useMinions";
 
 export default function Minions() {
   const [minions, setMinions] = useState<any[]>([]);
-  const [lastTransactionId, setLastTransactionId] = useState<string>();
-  const [transactionStatus, setTransactionStatus] = useState<number>();
-  const { network } = useConfig();
-
-  const isEmulator = (network) => network !== "mainnet" && network !== "testnet";
-  const isSealed = (statusCode) => statusCode === 4; // 4: 'SEALED'
+  const { data, isError, isLoading, mutate } = useMinions();
 
   useEffect(() => {
-    //Just for initial load
-    queryChain();
-  }, []);
-
-  useEffect(() => {
-    //Kicks off when lastTransactionId changes
-    if (lastTransactionId) {
-      console.log("Last Transaction ID: ", lastTransactionId);
-      fcl.tx(lastTransactionId).subscribe((res) => {
-        console.log("Transaction Status: ", res.status);
-        setTransactionStatus(res.statusString);
-
-        // Query for new chain string again if status is sealed
-        if (isSealed(res.status)) {
-          queryChain();
-        }
-      });
-    }
-  }, [lastTransactionId]);
-
-  const queryChain = async () => {
-    const res = await fcl.query({
-      cadence: getMinionsScript,
-    });
-    console.log("Minions: ", res);
-    res.sort((a, b) => a.name.localeCompare(b.name)); //Sort alphabetically for now
-    setMinions(res);
-  };
-
-  const openExplorerLink = (transactionId, network) => window.open(createExplorerTransactionLink({ network, transactionId }), "_blank");
+    if (data) setMinions(data);
+  }, [data]);
 
   const addMinionHelper = async (e: any) => {
     e.preventDefault();
-    addMinion(e.target.name.value, setLastTransactionId, setTransactionStatus);
+    addMinion(e.target.name.value, mutate);
     e.target.name.value = "";
   };
 
@@ -60,21 +24,22 @@ export default function Minions() {
     setMinions(editedMinions);
   };
 
+  if (isLoading) return <div>Loading...</div>;
+
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "20px" }}>
         <h2>Minions</h2>
-        <button style={{ height: "40px" }} onClick={() => importMinions(setLastTransactionId, setTransactionStatus)}>
+        <button style={{ height: "40px" }} onClick={() => importMinions(mutate)}>
           Import Minions
         </button>
       </div>
-      {/* <img src="https://drive.google.com/uc?export=view&id=19nLGECEHIBo3H-aT_vvZLetOa-TvCqq8" alt="Flow Logo" className={containerStyles.logo} /> */}
       <div>
         <form onSubmit={addMinionHelper}>
           <input type="text" id="name" placeholder="Add a Minion" />
           <button type="submit">+</button>
         </form>
-        <h4>Minions on Chain: {minions.length}</h4>
+        <h4>Minions on Chain: {minions?.length}</h4>
         <table>
           <thead>
             <tr>
@@ -106,34 +71,15 @@ export default function Minions() {
                   <input name="imageURL" value={minion.imageURL} type="text" onChange={(e) => onChangeInput(e, minion.name)} placeholder="Type Image URL" />
                 </td>
                 <td>
-                  <button onClick={() => setMinion(minion, setLastTransactionId, setTransactionStatus)} disabled={!minion.changed}>
+                  <button onClick={() => setMinion(minion, mutate)} disabled={!minion.changed}>
                     Update
                   </button>
-                  <button onClick={() => deleteMinion(minion.name, setLastTransactionId, setTransactionStatus)}>x</button>
+                  <button onClick={() => deleteMinion(minion.name, mutate)}>x</button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-      </div>
-      <hr />
-      <div>
-        {/* <h2>Mutate the Chain</h2>
-        {!isEmulator(network) && (
-          <h4>
-            Latest Transaction ID:{" "}
-            <a
-              className={elementStyles.link}
-              onClick={() => {
-                openExplorerLink(lastTransactionId, network);
-              }}
-            >
-              {lastTransactionId}
-            </a>
-          </h4>
-        )} */}
-        <h4>Latest Transaction ID: {lastTransactionId}</h4>
-        <h4>Latest Transaction Status: {transactionStatus}</h4>
       </div>
     </div>
   );

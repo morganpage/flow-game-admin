@@ -144,7 +144,7 @@ pub contract HOTF {
         }
         i=0
         while UInt8(self.hand.length) < self.maxHandSize && self.minions.length > 0 {
-            //let randomIndex =  Int(unsafeRandom()) % (availableMinions.length)
+            //let randomIndex =  Int(unsafeRandom()) % (self.minions.length)
             let randomIndex = i % (self.minions.length) //Change when unsafeRandom is fixed in emulator
             log("randomIndex:".concat(randomIndex.toString()))
             log("availableMinions.length:".concat(self.minions.length.toString()))

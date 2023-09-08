@@ -8,15 +8,16 @@ export default function Game() {
   const [name, setName] = useState<string>("");
   const [lastTransactionId, setLastTransactionId] = useState<string>();
   const [transactionStatus, setTransactionStatus] = useState<number>();
-  const gameState = useGameState(lastTransactionId);
+  const { gameState, isLoading, isError, mutate } = useGameState();
+  if (isLoading) return <div>Loading...</div>;
 
   return (
     <div>
-      <button onClick={() => restartMethod(name, setLastTransactionId, setTransactionStatus)}>Restart Game</button>
+      <button onClick={() => restartMethod(name, mutate)}>Restart Game</button>
       {!gameState.name && (
         <div>
           <h2>First you must log in to the game</h2>
-          <button onClick={() => loginMethod(name, setLastTransactionId, setTransactionStatus)}>Login to Game</button>
+          <button onClick={() => loginMethod(name, mutate)}>Login to Game</button>
           <input name="name" value={name} type="text" onChange={(e) => setName(e.target.value)} placeholder="Type Name" />
         </div>
       )}
@@ -24,9 +25,9 @@ export default function Game() {
         <div>
           <h2>Welcome back {gameState.name}, let's carry on with the game</h2>
           <p>Mana: {gameState.mana}</p>
-          <button onClick={() => drawMethod(setLastTransactionId, setTransactionStatus)}>Draw</button>
+          <button onClick={() => drawMethod(mutate)}>Draw</button>
           <p>Hand: </p>
-          <div style={{ display: "flex" }}>{gameState.hand && gameState.hand.map((minion: any, index: Number) => <Card key={minion.name} minion={minion} index={index} setTransactionId={setLastTransactionId} setTransactionStatus={setTransactionStatus} />)}</div>
+          <div style={{ display: "flex" }}>{gameState.hand && gameState.hand.map((minion: any, index: Number) => <Card key={minion.name} minion={minion} index={index} mutate={mutate} />)}</div>
           <p>Battle:</p>
           <div style={{ display: "flex" }}>
             <Slot minion={null} index={0} setTransactionId={setLastTransactionId} setTransactionStatus={setTransactionStatus} />

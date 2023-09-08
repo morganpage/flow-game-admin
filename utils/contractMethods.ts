@@ -17,137 +17,103 @@ import minionData from "../data/minions.json";
 //const flowNetwork = process.env.NEXT_PUBLIC_FLOW_NETWORK;
 const autoSign = process.env.NEXT_PUBLIC_AUTOSIGN === "true";
 
-const setTransactionIdAndStatus = (transactionId, setTransactionId, setTransactionStatus) => {
-  setTransactionId(transactionId);
-  fcl.tx(transactionId).subscribe((res) => {
-    if (fcl.tx.isSealed(res)) {
-      console.log("Transaction Sealed");
-      setTransactionStatus("Sealed");
-    }
-  });
-};
-
 // MINION ADMIN
 
-export const importMinions = async (setTransactionId, setTransactionStatus) => {
+export const importMinions = async (mutate) => {
   console.log(minionData);
   let names = minionData.map((minion) => minion.name);
   let descriptions = minionData.map((minion) => minion.description);
   let imageURLs = minionData.map((minion) => minion.imageURL);
   let attacks = minionData.map((minion) => minion.attack);
   let healths = minionData.map((minion) => minion.health);
-  setTransactionStatus("Pending...");
   let mutateArgs = {
     cadence: setMinionsTransaction,
     args: (arg, t) => [arg(names, t.Array(t.String)), arg(descriptions, t.Array(t.String)), arg(imageURLs, t.Array(t.String)), arg(attacks, t.Array(t.UInt8)), arg(healths, t.Array(t.UInt8))],
   };
   if (autoSign) mutateArgs["authorizations"] = [adminAuthorizationFunction];
   const transactionId = await fcl.mutate(mutateArgs);
-  setTransactionIdAndStatus(transactionId, setTransactionId, setTransactionStatus);
+  mutateOnSealed(transactionId, mutate);
 };
 
-export const setMinion = async (minion, setTransactionId, setTransactionStatus) => {
-  setTransactionStatus("Pending...");
+export const setMinion = async (minion, mutate) => {
   let mutateArgs = {
     cadence: setMinionTransaction,
     args: (arg, t) => [arg(minion.name, t.String), arg(minion.description, t.String), arg(minion.imageURL, t.String), arg(minion.attack, t.UInt8), arg(minion.health, t.UInt8)],
   };
   if (autoSign) mutateArgs["authorizations"] = [adminAuthorizationFunction];
   const transactionId = await fcl.mutate(mutateArgs);
-  setTransactionIdAndStatus(transactionId, setTransactionId, setTransactionStatus);
+  mutateOnSealed(transactionId, mutate);
 };
 
-export const addMinion = async (minionName, setTransactionId, setTransactionStatus) => {
-  setTransactionStatus("Pending...");
+export const addMinion = async (minionName, mutate) => {
   let mutateArgs = {
     cadence: addMinionTransaction,
     args: (arg, t) => [arg(minionName, t.String)],
   };
   if (autoSign) mutateArgs["authorizations"] = [adminAuthorizationFunction];
   const transactionId = await fcl.mutate(mutateArgs);
-  setTransactionIdAndStatus(transactionId, setTransactionId, setTransactionStatus);
+  mutateOnSealed(transactionId, mutate);
 };
 
-export const deleteMinion = async (minionName, setTransactionId, setTransactionStatus) => {
-  setTransactionStatus("Pending...");
+export const deleteMinion = async (minionName, mutate) => {
   let mutateArgs = {
     cadence: deleteMinionTransaction,
     args: (arg, t) => [arg(minionName, t.String)],
   };
   if (autoSign) mutateArgs["authorizations"] = [adminAuthorizationFunction];
   const transactionId = await fcl.mutate(mutateArgs);
-  setTransactionIdAndStatus(transactionId, setTransactionId, setTransactionStatus);
+  mutateOnSealed(transactionId, mutate);
 };
 
 // GAME
-export const restartMethod = async (name: string, setTransactionId, setTransactionStatus) => {
+export const restartMethod = async (name: string, mutate) => {
   console.log("restartMethod " + name);
-  setTransactionStatus("Pending...");
   let mutateArgs = {
     cadence: restartTransaction,
     args: (arg, t) => [arg(name, t.String)],
   };
   if (autoSign) mutateArgs["authorizations"] = [adminAuthorizationFunction];
   const transactionId = await fcl.mutate(mutateArgs);
-  setTransactionId(transactionId);
+  mutateOnSealed(transactionId, mutate);
+};
+
+const mutateOnSealed = (transactionId, mutate) => {
   fcl.tx(transactionId).subscribe((res) => {
     if (fcl.tx.isSealed(res)) {
-      console.log("Transaction Sealed");
-      setTransactionStatus("Sealed");
+      mutate();
     }
   });
 };
 
-export const loginMethod = async (name: string, setTransactionId, setTransactionStatus) => {
+export const loginMethod = async (name: string, mutate) => {
   console.log("Login " + name);
   let mutateArgs = {
     cadence: loginTransaction,
     args: (arg, t) => [arg(name, t.String)],
   };
   if (autoSign) mutateArgs["authorizations"] = [adminAuthorizationFunction];
-  setTransactionStatus("Pending...");
   const transactionId = await fcl.mutate(mutateArgs);
-  setTransactionId(transactionId);
-  fcl.tx(transactionId).subscribe((res) => {
-    if (fcl.tx.isSealed(res)) {
-      console.log("Transaction Sealed");
-      setTransactionStatus("Sealed");
-    }
-  });
+  mutateOnSealed(transactionId, mutate);
 };
 
-export const holdMethod = async (index: Number, hold, setTransactionId, setTransactionStatus) => {
+export const holdMethod = async (index: Number, hold, mutate) => {
   console.log("Hold" + index + " " + hold);
-  setTransactionStatus("Pending...");
   let mutateArgs = {
     cadence: holdTransaction,
     args: (arg, t) => [arg(index, t.Int), arg(hold, t.Bool)],
   };
   if (autoSign) mutateArgs["authorizations"] = [adminAuthorizationFunction];
   const transactionId = await fcl.mutate(mutateArgs);
-  setTransactionId(transactionId);
-  fcl.tx(transactionId).subscribe((res) => {
-    if (fcl.tx.isSealed(res)) {
-      console.log("Transaction Sealed");
-      setTransactionStatus("Sealed");
-    }
-  });
+  mutateOnSealed(transactionId, mutate);
 };
 
-export const drawMethod = async (setTransactionId, setTransactionStatus) => {
+export const drawMethod = async (mutate) => {
   console.log("Draw");
-  setTransactionStatus("Pending...");
   let mutateArgs = {
     cadence: drawTransaction,
     args: (arg, t) => [],
   };
   if (autoSign) mutateArgs["authorizations"] = [adminAuthorizationFunction];
   const transactionId = await fcl.mutate(mutateArgs);
-  setTransactionId(transactionId);
-  fcl.tx(transactionId).subscribe((res) => {
-    if (fcl.tx.isSealed(res)) {
-      console.log("Transaction Sealed");
-      setTransactionStatus("Sealed");
-    }
-  });
+  mutateOnSealed(transactionId, mutate);
 };
