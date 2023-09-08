@@ -2,6 +2,7 @@ import { loginMethod, drawMethod, restartMethod } from "../utils/contractMethods
 import { useState } from "react";
 import useGameState from "../hooks/useGameState";
 import Card from "./Card";
+import Slot from "./Slot";
 
 export default function Game() {
   const [name, setName] = useState<string>("");
@@ -26,6 +27,14 @@ export default function Game() {
           <button onClick={() => drawMethod(setLastTransactionId, setTransactionStatus)}>Draw</button>
           <p>Hand: </p>
           <div style={{ display: "flex" }}>{gameState.hand && gameState.hand.map((minion: any, index: Number) => <Card key={minion.name} minion={minion} index={index} setTransactionId={setLastTransactionId} setTransactionStatus={setTransactionStatus} />)}</div>
+          <p>Battle:</p>
+          <div style={{ display: "flex" }}>
+            <Slot minion={null} index={0} setTransactionId={setLastTransactionId} setTransactionStatus={setTransactionStatus} />
+            <Slot minion={null} index={0} setTransactionId={setLastTransactionId} setTransactionStatus={setTransactionStatus} />
+            <Slot minion={null} index={0} setTransactionId={setLastTransactionId} setTransactionStatus={setTransactionStatus} />
+            <Slot minion={null} index={0} setTransactionId={setLastTransactionId} setTransactionStatus={setTransactionStatus} />
+            <Slot minion={null} index={0} setTransactionId={setLastTransactionId} setTransactionStatus={setTransactionStatus} />
+          </div>
         </div>
       )}
 

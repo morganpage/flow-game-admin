@@ -18,10 +18,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "flow test cadence/tests/test_script.cdc"
+    "test": "flow test cadence/tests/test_script.cdc",
+    "update:testnet": "flow project deploy --network=testnet --update"
   },
   "dependencies": {
-    "@onflow/fcl": "^1.5.2",
+    "@onflow/fcl": "^1.6.0",
     "@onflow/flow-js-testing": "^0.4.0",
     "@onflow/typedefs": "^1.1.1",
     "next": "13.0.0",

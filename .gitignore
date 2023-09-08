@@ -40,3 +40,4 @@ testnet-account.private.json
 # any keys!
 *.key
 testnet-admin.pkey
+testnet-account.pkey

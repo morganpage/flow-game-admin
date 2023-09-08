@@ -39,24 +39,10 @@ export default function Minions() {
     const res = await fcl.query({
       cadence: getMinionsScript,
     });
+    console.log("Minions: ", res);
     res.sort((a, b) => a.name.localeCompare(b.name)); //Sort alphabetically for now
     setMinions(res);
   };
-
-  // const mutateGreeting = async (event) => {
-  //   event.preventDefault();
-
-  //   if (!userGreetingInput.length) {
-  //     throw new Error("Please add a new greeting string.");
-  //   }
-
-  //   const transactionId = await fcl.mutate({
-  //     cadence: UpdateHelloWorld,
-  //     args: (arg, t) => [arg(userGreetingInput, t.String)],
-  //   });
-
-  //   setLastTransactionId(transactionId);
-  // };
 
   const openExplorerLink = (transactionId, network) => window.open(createExplorerTransactionLink({ network, transactionId }), "_blank");
 
@@ -119,7 +105,6 @@ export default function Minions() {
                 <td>
                   <input name="imageURL" value={minion.imageURL} type="text" onChange={(e) => onChangeInput(e, minion.name)} placeholder="Type Image URL" />
                 </td>
-                <p>{minion.hold.toString()}</p>
                 <td>
                   <button onClick={() => setMinion(minion, setLastTransactionId, setTransactionStatus)} disabled={!minion.changed}>
                     Update

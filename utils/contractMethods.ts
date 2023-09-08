@@ -14,7 +14,8 @@ import restartTransaction from "../cadence/transactions/HOTF_restart.cdc";
 import { adminAuthorizationFunction } from "../utils/authFunctions";
 import minionData from "../data/minions.json";
 
-const flowNetwork = process.env.NEXT_PUBLIC_FLOW_NETWORK;
+//const flowNetwork = process.env.NEXT_PUBLIC_FLOW_NETWORK;
+const autoSign = process.env.NEXT_PUBLIC_AUTOSIGN === "true";
 
 const setTransactionIdAndStatus = (transactionId, setTransactionId, setTransactionStatus) => {
   setTransactionId(transactionId);
@@ -40,7 +41,7 @@ export const importMinions = async (setTransactionId, setTransactionStatus) => {
     cadence: setMinionsTransaction,
     args: (arg, t) => [arg(names, t.Array(t.String)), arg(descriptions, t.Array(t.String)), arg(imageURLs, t.Array(t.String)), arg(attacks, t.Array(t.UInt8)), arg(healths, t.Array(t.UInt8))],
   };
-  if (flowNetwork === "local") mutateArgs["authorizations"] = [adminAuthorizationFunction];
+  if (autoSign) mutateArgs["authorizations"] = [adminAuthorizationFunction];
   const transactionId = await fcl.mutate(mutateArgs);
   setTransactionIdAndStatus(transactionId, setTransactionId, setTransactionStatus);
 };
@@ -51,7 +52,7 @@ export const setMinion = async (minion, setTransactionId, setTransactionStatus) 
     cadence: setMinionTransaction,
     args: (arg, t) => [arg(minion.name, t.String), arg(minion.description, t.String), arg(minion.imageURL, t.String), arg(minion.attack, t.UInt8), arg(minion.health, t.UInt8)],
   };
-  if (flowNetwork === "local") mutateArgs["authorizations"] = [adminAuthorizationFunction];
+  if (autoSign) mutateArgs["authorizations"] = [adminAuthorizationFunction];
   const transactionId = await fcl.mutate(mutateArgs);
   setTransactionIdAndStatus(transactionId, setTransactionId, setTransactionStatus);
 };
@@ -62,7 +63,7 @@ export const addMinion = async (minionName, setTransactionId, setTransactionStat
     cadence: addMinionTransaction,
     args: (arg, t) => [arg(minionName, t.String)],
   };
-  if (flowNetwork === "local") mutateArgs["authorizations"] = [adminAuthorizationFunction];
+  if (autoSign) mutateArgs["authorizations"] = [adminAuthorizationFunction];
   const transactionId = await fcl.mutate(mutateArgs);
   setTransactionIdAndStatus(transactionId, setTransactionId, setTransactionStatus);
 };
@@ -73,7 +74,7 @@ export const deleteMinion = async (minionName, setTransactionId, setTransactionS
     cadence: deleteMinionTransaction,
     args: (arg, t) => [arg(minionName, t.String)],
   };
-  if (flowNetwork === "local") mutateArgs["authorizations"] = [adminAuthorizationFunction];
+  if (autoSign) mutateArgs["authorizations"] = [adminAuthorizationFunction];
   const transactionId = await fcl.mutate(mutateArgs);
   setTransactionIdAndStatus(transactionId, setTransactionId, setTransactionStatus);
 };
@@ -86,7 +87,7 @@ export const restartMethod = async (name: string, setTransactionId, setTransacti
     cadence: restartTransaction,
     args: (arg, t) => [arg(name, t.String)],
   };
-  if (flowNetwork === "local") mutateArgs["authorizations"] = [adminAuthorizationFunction];
+  if (autoSign) mutateArgs["authorizations"] = [adminAuthorizationFunction];
   const transactionId = await fcl.mutate(mutateArgs);
   setTransactionId(transactionId);
   fcl.tx(transactionId).subscribe((res) => {
@@ -103,7 +104,7 @@ export const loginMethod = async (name: string, setTransactionId, setTransaction
     cadence: loginTransaction,
     args: (arg, t) => [arg(name, t.String)],
   };
-  if (flowNetwork === "local") mutateArgs["authorizations"] = [adminAuthorizationFunction];
+  if (autoSign) mutateArgs["authorizations"] = [adminAuthorizationFunction];
   setTransactionStatus("Pending...");
   const transactionId = await fcl.mutate(mutateArgs);
   setTransactionId(transactionId);
@@ -122,7 +123,7 @@ export const holdMethod = async (index: Number, hold, setTransactionId, setTrans
     cadence: holdTransaction,
     args: (arg, t) => [arg(index, t.Int), arg(hold, t.Bool)],
   };
-  if (flowNetwork === "local") mutateArgs["authorizations"] = [adminAuthorizationFunction];
+  if (autoSign) mutateArgs["authorizations"] = [adminAuthorizationFunction];
   const transactionId = await fcl.mutate(mutateArgs);
   setTransactionId(transactionId);
   fcl.tx(transactionId).subscribe((res) => {
@@ -140,7 +141,7 @@ export const drawMethod = async (setTransactionId, setTransactionStatus) => {
     cadence: drawTransaction,
     args: (arg, t) => [],
   };
-  if (flowNetwork === "local") mutateArgs["authorizations"] = [adminAuthorizationFunction];
+  if (autoSign) mutateArgs["authorizations"] = [adminAuthorizationFunction];
   const transactionId = await fcl.mutate(mutateArgs);
   setTransactionId(transactionId);
   fcl.tx(transactionId).subscribe((res) => {

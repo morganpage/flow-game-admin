@@ -1,4 +1,6 @@
 import { sign } from "./crypto";
+import * as fcl from "@onflow/fcl";
+import flowJSON from "../flow.json";
 //import type { AuthorizationObject } from "@onflow/fcl";
 // import { getUrl } from "./get-url";
 
@@ -7,6 +9,8 @@ export function getUrl() {
 }
 
 export function adminAuthorizationFunction(account: any) {
+  console.log("adminAuthorizationFunction");
+
   const adminPrivateKey = process.env.NEXT_PUBLIC_ADMIN_PRIVATE_KEY_HEX;
   const adminKeyIndex = process.env.NEXT_PUBLIC_ADMIN_KEY_INDEX;
   const adminAddress = process.env.NEXT_PUBLIC_ADMIN_ADDRESS;
