@@ -1,6 +1,5 @@
 import * as fcl from "@onflow/fcl";
 //MINIONS
-import getMinionsScript from "../cadence/scripts/HOTF_getMinions.cdc";
 import setMinionTransaction from "../cadence/transactions/HOTF_setMinion.cdc";
 import setMinionsTransaction from "../cadence/transactions/HOTF_setMinions.cdc";
 import addMinionTransaction from "../cadence/transactions/HOTF_addMinion.cdc";
@@ -10,6 +9,7 @@ import loginTransaction from "../cadence/transactions/HOTF_login.cdc";
 import drawTransaction from "../cadence/transactions/HOTF_draw.cdc";
 import holdTransaction from "../cadence/transactions/HOTF_hold.cdc";
 import restartTransaction from "../cadence/transactions/HOTF_restart.cdc";
+import placeTransaction from "../cadence/transactions/HOTF_place.cdc";
 
 import { adminAuthorizationFunction } from "../utils/authFunctions";
 import minionData from "../data/minions.json";
@@ -112,6 +112,18 @@ export const drawMethod = async (mutate) => {
   let mutateArgs = {
     cadence: drawTransaction,
     args: (arg, t) => [],
+  };
+  if (autoSign) mutateArgs["authorizations"] = [adminAuthorizationFunction];
+  const transactionId = await fcl.mutate(mutateArgs);
+  mutateOnSealed(transactionId, mutate);
+};
+
+export const placeMethod = async (battleIndex: String, handIndex: String, mutate) => {
+  //battleIndex: Int,handIndex: Int
+  console.log("Place: battleIndex: " + battleIndex + " handIndex: " + handIndex);
+  let mutateArgs = {
+    cadence: placeTransaction,
+    args: (arg, t) => [arg(battleIndex, t.Int), arg(handIndex, t.Int)],
   };
   if (autoSign) mutateArgs["authorizations"] = [adminAuthorizationFunction];
   const transactionId = await fcl.mutate(mutateArgs);

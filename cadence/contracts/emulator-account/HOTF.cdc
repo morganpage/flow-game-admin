@@ -97,6 +97,7 @@ pub contract HOTF {
       pub var mana: UInt8
       pub var hand: [Minion] //Minions in the user's hand
       pub fun getName() : String
+      pub var battlefield: {Int: Minion}
     }
 
     pub resource interface UserGameStatePublicInterface
@@ -104,38 +105,66 @@ pub contract HOTF {
       pub var mana: UInt8
       pub var hand: [Minion] //Minions in the user's hand
       pub fun getName() : String
+      pub var battlefield: {Int: Minion}
     }
 
     pub resource UserGameState : UserGameStatePublicInterface,UserGameStatePrivateInterface { //This contains the local state of the game for each user
       pub var name: String
       pub var minions: [Minion] //Minions available to the user
-      pub var hand: [Minion] //Minions in the user's hand
+      pub var hand: [Minion] //Minions in the user's hand,position in hand doesn't matter
+      pub var battlefield: {Int: Minion} //Minions on the user's battlefield, position does matter
       pub var mana: UInt8
       pub let maxHandSize: UInt8
+      pub let maxBattlefieldSize: UInt8
 
       init(name: String) {
         self.name = name
         self.minions = HOTF.getMinions() //For the moment the user gets all the minions, needs to be changed to only get the ones they have
         self.hand = [] //Hand is empty at the start of the game
+        self.battlefield = {} //Battlefield is empty at the start of the game
         self.mana = 11 //First draw will reduce this to 10
         self.maxHandSize = 3
+        self.maxBattlefieldSize = 5
+      }
+
+      pub fun place(battleIndex: Int,handIndex: Int) {//Place a minion from the hand onto the battlefield
+        pre {
+            handIndex < self.hand.length: "Hand index out of bounds"
+            UInt8(battleIndex) < self.maxBattlefieldSize: "Battlefield index out of bounds"
+            self.battlefield[battleIndex] == nil: "Battlefield index already occupied"
+            self.mana >= 3: "Not enough mana"
+        }
+        self.battlefield[battleIndex] = self.hand[handIndex]
+        self.hand.remove(at: handIndex)
+        self.mana = self.mana - 3
+      }
+
+      pub fun move(battleIndexFrom: Int,battleIndexTo: Int) {//Move a minion on the battlefield
+        pre {
+            UInt8(battleIndexFrom) < self.maxBattlefieldSize: "Battlefield index out of bounds"
+            UInt8(battleIndexTo) < self.maxBattlefieldSize: "Battlefield index out of bounds"
+            self.battlefield[battleIndexFrom] != nil: "Battlefield from index is empty"
+            self.battlefield[battleIndexTo] == nil: "Battlefield to index is occupied"
+        }
+        self.battlefield[battleIndexTo] = self.battlefield[battleIndexFrom]
+        self.battlefield[battleIndexFrom] = nil
       }
 
       pub fun hold(handIndex: Int,hold: Bool){
-        if handIndex >= self.hand.length {
-            return
-        }
+         pre {
+            handIndex < self.hand.length: "Hand index out of bounds"
+         }
         self.hand[handIndex].hold = hold
       }
 
       pub fun draw() { //Draw random cards from the deck
-        log("draw")
+       pre {
+            self.mana > 0: "Not enough mana"
+        }
         self.mana = self.mana - 1
-        log("self.mana:".concat(self.mana.toString()))
         var i: Int = 0
-        //Clear any non-held cards from the hand
         i = (self.hand.length) - 1
-        while i >= 0 {
+        while i >= 0 {  //Clear any non-held cards from the hand
           log(i.toString())
             if !self.hand[i].hold {
                 self.hand.remove(at: i)
@@ -154,17 +183,9 @@ pub contract HOTF {
             i = i + 1
         }
         log("self.hand.length:".concat(self.hand.length.toString()))
-        // while i < self.maxHandSize && self.minions.length > 0 {
-        //     //let randomIndex =  Int(unsafeRandom()) % (availableMinions.length)
-        //     let randomIndex = i % UInt8(self.minions.length) //Change when unsafeRandom is fixed in emulator
-        //     log("randomIndex:".concat(randomIndex.toString()))
-        //     log("availableMinions.length:".concat(self.minions.length.toString()))
-        //     let randomMinion = self.minions[randomIndex]
-        //     self.hand.append(randomMinion)
-        //     self.minions.remove(at: randomIndex)
-        //     i = i + 1
-        // }
       }
+
+
 
       pub fun getName() : String
       {
