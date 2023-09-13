@@ -11,7 +11,6 @@ pub fun main(address:Address): Int {
     log("Public GameState Link borrow failed")
     return 0
   }
-  //return refUserGameStateCap.borrow()!.mana
   let hand = refUserGameStateCap.borrow()!.hand
   return hand.length
 }

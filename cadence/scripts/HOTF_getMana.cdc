@@ -11,7 +11,6 @@ pub fun main(address:Address): UInt8 {
     log("Public GameState Link borrow failed")
     return 0
   }
-  //return refUserGameStateCap.borrow()!.mana
   let mana = refUserGameStateCap.borrow()!.mana
   return mana
 }

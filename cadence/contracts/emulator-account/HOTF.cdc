@@ -2,13 +2,17 @@ pub contract HOTF {
     //Admin paths
     pub let AdminStoragePath: StoragePath
     pub let AdminPrivatePath: PrivatePath
+    //Game paths
+    pub let GamesStoragePath: StoragePath
     //UserGameState paths
     pub let UserGameStateStoragePath: StoragePath
     pub let UserGameStatePublicPath: PublicPath
     pub let UserGameStatePrivatePath: PrivatePath
 
     pub var minions: {String : Minion} //Global minion templates
-    pub var games: {Address : GameState} //user address to gamestate mapping - All the games that are currently running and have ever run
+    //pub var games: @{UInt64: Game}
+    pub var games: {UInt64 : Game} //All the games that are currently running and have ever run
+    //pub var games: @{Int: Game}
 
     pub enum Trigger: UInt8 {
         pub case onStartBattle
@@ -49,22 +53,118 @@ pub contract HOTF {
             self.team = team
             self.hold = false
         }
+        pub fun toString() : String {
+            return self.name.concat(": attack:").concat(self.attack.toString().concat(" health:").concat(self.health.toString()))
+        }
+
     }
 
     pub fun getMinions(): [Minion] {
      return self.minions.values
     }
-    pub fun login(userAddress: Address): GameState {
-        log(self.account.address)
-        log(userAddress)
-        let userGameState = self.games[userAddress]
-        if userGameState == nil {
-            let newGameState = GameState(userAddress: userAddress)
-            self.games[userAddress] = newGameState
-            return newGameState
+
+    pub struct Game{
+      pub var players: [Capability<&AnyResource{HOTF.UserGameStatePrivateInterface}>]
+      pub var uuid: UInt64
+      init(userStateCapability: Capability<&AnyResource{HOTF.UserGameStatePrivateInterface}>) {
+        let userGameState = userStateCapability.borrow() ?? panic("Cannot borrow user State")
+        self.players = [userStateCapability]
+        self.uuid = UInt64(HOTF.games.length) + 1
+        userGameState.setGameId(gameId: self.uuid)
+      }
+      // init(userStateCapability: Capability<&AnyResource{HOTF.UserGameStatePrivateInterface}>) {
+      //   self.players = [userStateCapability]//Put player into the game at index 0
+      //   //Set this player's game to this game
+      //   let userGameState = userStateCapability.borrow()
+      //   //userGameState.gameId = self.uuid
+      //   userGameState?.setGameId(gameId: self.uuid)
+      //   self.uuid = UInt64(unsafeRandom())
+      // }
+      pub fun getPlayers()
+      {
+        log("getPlayers")
+        log(self.players.length.toString())
+        for player in self.players {
+          log("player: ".concat(player.borrow()?.getName() ?? "No name"))
         }
-        return userGameState!
+      }
     }
+
+    // pub resource Games {
+    //   pub var games: @{UInt64: Game}
+    //   init(){
+    //     self.games <- {}
+    //   }
+    //   pub fun CreateGame(userStateCapability: Capability<&AnyResource{HOTF.UserGameStatePrivateInterface}>) {
+    //     let game <- create Game(userStateCapability: userStateCapability)
+    //     let gameId = game.uuid
+    //     self.games[gameId] <-! game
+    //     log("Game created: ".concat(gameId.toString()))
+    //   }
+
+    //   pub fun getIDs(): [UInt64] {
+    //     // The keys in the games dictionary are the IDs
+    //     return self.games.keys
+    //   }
+
+    //   // pub fun CreateGame(userStateCapability: Capability<&AnyResource{HOTF.UserGameStatePrivateInterface}>){
+    //   //   let userGameState = userStateCapability.borrow()
+    //   //   var userAddress: Address = userGameState?.owner?.address ?? panic("User state has no owner")
+    //   //   self.games[userAddress] = Game()
+    //   // }
+    //   destroy (){
+    //     destroy self.games
+    //   }
+    // }
+
+    // pub resource Game {
+    //   //pub var players: [Address] // 0 - player 1, 1 - player 2
+    //   pub var players: [Capability<&AnyResource{HOTF.UserGameStatePrivateInterface}>]
+    //   // init(){
+    //   //   self.players = []
+    //   // }
+    //   init(userStateCapability: Capability<&AnyResource{HOTF.UserGameStatePrivateInterface}>) {
+    //     self.players = [userStateCapability]//Put player into the game at index 0
+    //     //Set this player's game to this game
+    //     let userGameState = userStateCapability.borrow()
+    //     //userGameState.gameId = self.uuid
+    //     userGameState?.setGameId(gameId: self.uuid)
+    //   }
+    //   pub fun getPlayers()
+    //   {
+    //     log("getPlayers")
+    //     log(self.players.length.toString())
+    //     for player in self.players {
+    //       log("player: ".concat(player.borrow()?.getName() ?? "No name"))
+    //     }
+    //   }
+
+    // }
+
+    //   // init(userAddress: Address) {
+    //   //   self.players = [userAddress]//Put player into the game at index 0
+    //   // }
+
+    //   // pub fun CreateGame(userStateCapability: Capability<&AnyResource{HOTF.UserGameStatePrivateInterface}>){
+    //   //   let userGameState = userStateCapability.borrow()
+    //   //   var userAddress: Address = userGameState?.owner?.address ?? panic("User state has no owner")
+    //   //   self.players.append(userAddress)
+    //   //   //self.players.append(userGameState.getName())
+    //   // }
+
+    // }
+
+    // pub fun login(userAddress: Address): GameState {
+    //     log(self.account.address)
+    //     log(userAddress)
+    //     let userGameState = self.games[userAddress]
+    //     if userGameState == nil {
+    //         let newGameState = GameState(userAddress: userAddress)
+    //         self.games[userAddress] = newGameState
+    //         return newGameState
+    //     }
+    //     return userGameState!
+    // }
 
     pub resource Administrator {
 
@@ -81,27 +181,28 @@ pub contract HOTF {
         }
     }
 
-    pub struct GameState { //The full gamestate of each game ever played and being played
-      pub var players: [Address] // 0 - player 1, 1 - player 2
-      pub var mana: UInt8
+    // pub struct GameState { //The full gamestate of each game ever played and being played
+    //   pub var players: [Address] // 0 - player 1, 1 - player 2
 
-      init(userAddress: Address) {
-        self.players = [userAddress]//Put player into the game at index 0
-        self.mana = 10
-      }
-    }
+    //   init(userAddress: Address) {
+    //     self.players = [userAddress]//Put player into the game at index 0
+    //   }
+    // }
 
     // private interface, only accessible to owner and game contract
     pub resource interface UserGameStatePrivateInterface
     {
+      pub var gameId: UInt64
       pub var mana: UInt8
       pub var hand: [Minion] //Minions in the user's hand
       pub fun getName() : String
       pub var battlefield: {Int: Minion}
+      pub fun setGameId(gameId: UInt64)
     }
 
     pub resource interface UserGameStatePublicInterface
     {
+      pub var gameId: UInt64
       pub var mana: UInt8
       pub var hand: [Minion] //Minions in the user's hand
       pub fun getName() : String
@@ -110,6 +211,7 @@ pub contract HOTF {
 
     pub resource UserGameState : UserGameStatePublicInterface,UserGameStatePrivateInterface { //This contains the local state of the game for each user
       pub var name: String
+      pub var gameId: UInt64
       pub var minions: [Minion] //Minions available to the user
       pub var hand: [Minion] //Minions in the user's hand,position in hand doesn't matter
       pub var battlefield: {Int: Minion} //Minions on the user's battlefield, position does matter
@@ -119,12 +221,17 @@ pub contract HOTF {
 
       init(name: String) {
         self.name = name
+        self.gameId = 0
         self.minions = HOTF.getMinions() //For the moment the user gets all the minions, needs to be changed to only get the ones they have
         self.hand = [] //Hand is empty at the start of the game
         self.battlefield = {} //Battlefield is empty at the start of the game
         self.mana = 11 //First draw will reduce this to 10
         self.maxHandSize = 3
         self.maxBattlefieldSize = 5
+      }
+
+      pub fun setGameId(gameId: UInt64) {
+        self.gameId = gameId
       }
 
       pub fun place(battleIndex: Int,handIndex: Int) {//Place a minion from the hand onto the battlefield
@@ -195,18 +302,24 @@ pub contract HOTF {
 
     init(){
         self.minions = {}
+        //self.games <- {}
         self.games = {}
         self.AdminStoragePath = /storage/HOTFAdmin
         self.AdminPrivatePath = /private/AdminPrivatePath
+        self.GamesStoragePath = /storage/HOTFGame
         self.UserGameStateStoragePath = /storage/HOTFUserGameState
         self.UserGameStatePublicPath = /public/HOTFUserGameState
         self.UserGameStatePrivatePath = /private/HOTFUserGameState
-        //Create the one-off admin resource here
+        //Create the one-off admin resource here, this looks after the minion templates
         self.account.save<@Administrator>(<-create Administrator(), to: self.AdminStoragePath)
         let adminRef = self.account.borrow<&HOTF.Administrator>(from: self.AdminStoragePath) ?? panic("Not an admin!")
         adminRef.addMinion(name: "Minion 1")
         adminRef.addMinion(name: "Minion 2")
         adminRef.addMinion(name: "Minion 3")
+        //Create the one-off games resource here, this looks after the games
+        //self.account.save<@Games>(<-create Games(), to: self.GamesStoragePath)
+        //self.account.link<&{HOTF.GamesInterface}>(/public/Games, target: self.GamesStoragePath)
+
         // self.account.link<&GameDB>(self.AdminPrivatePath, target: self.AdminStoragePath) 
         //                                         ?? panic("Could not get a capability to the GameDB")
     }
@@ -215,5 +328,65 @@ pub contract HOTF {
     {
         return <- create UserGameState(name: name)
     }
+    pub fun Battle(userStateCapability: Capability<&AnyResource{HOTF.UserGameStatePrivateInterface}>){
+      log("Battle")
+      let userState = userStateCapability.borrow() ?? panic("Cannot borrow user State")
+      var gameId = userState.gameId //Will be 0 if no game
+      log("gameId:".concat(gameId.toString()))
+      if(gameId == 0) {
+        log("Creating game")
+        let game = Game(userStateCapability: userStateCapability)
+        gameId = game.uuid
+        self.games[game.uuid] = game
+      }
+      else {
+        log("Game already exists: ".concat(gameId.toString()))
+      }
+      let game = self.games[gameId] ?? panic("Game not found")
+      log(game.uuid.toString())
+      game.getPlayers()
+      //Battle code here
+      //Add enemy minions to the battlefield
+      //game.players[1]
 
+
+      log("Battle end:")
+    }
+
+    // pub fun Battle(userStateCapability: Capability<&AnyResource{HOTF.UserGameStatePrivateInterface}>){
+    //   log("Battle")
+    //   let userState = userStateCapability.borrow() ?? panic("Cannot borrow user State")
+    //   var gameId = userState.gameId //Will be 0 if no game
+    //   log("gameId:".concat(gameId.toString()))
+    //   if(gameId == 0) {
+    //     log("Creating game")
+    //     let game <- create Game(userStateCapability: userStateCapability)
+    //     gameId = game.uuid
+    //     self.games[game.uuid] <-! game
+    //   }
+    //   else {
+    //     log("Game already exists: ".concat(gameId.toString()))
+    //   }
+    //   //let game <-! self.games[gameId] <- nil
+    //   let game  <-! self.games[gameId] <- nil
+
+    //   game?.getPlayers()
+    //   self.games[gameId] <-! game
+    //   self.games[gameId]?.getPlayers()
+    //   log("Battle end:")
+    // }
+
+//     pub fun Battle(userStateCapability: Capability<&AnyResource{HOTF.UserGameStatePrivateInterface}>) {
+//       //When a user clicks the battle button, this is called
+//       //Either create a game if first battle or resume a game if not
+//       //First try and get existing game from uuid
+//       //let game = self.account.getCapability<&AnyResource>(self.GamesStoragePath).borrow()
+//       //let games = self.account.getCapability<&Games>(self.GamesStoragePath).borrow()
+//       let userState = userStateCapability.borrow() ?? panic("Cannot borrow user State")
+//       let gameId = userState.gameId
+//       log("gameId:".concat(gameId.toString()))
+// // if let inboxCollection = self.account.getCapability(self.CollectionPublicPath).borrow<&{FlovatarInbox.CollectionPublic}>()  {
+// //             return inboxCollection.getFlovatarDustBalance(id: id)
+// //         }
+//     }
 }

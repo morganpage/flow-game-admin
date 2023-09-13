@@ -6,12 +6,14 @@ pub let getMinions = "../scripts/HOTF_getMinions_test.cdc"
 pub let getMana = "../scripts/HOTF_getMana.cdc"
 pub let getName = "../scripts/HOTF_getName.cdc"
 pub let getHand = "../scripts/HOTF_getHand_test.cdc"
+pub let getBattlefield = "../scripts/HOTF_getBattlefield_test.cdc"
 //Transactions
 pub let addMinion = "../transactions/HOTF_addMinion.cdc"
 pub let draw = "../transactions/HOTF_draw.cdc"
 pub let hold = "../transactions/HOTF_hold.cdc"
 pub let login = "../transactions/HOTF_login.cdc"
-
+pub let place = "../transactions/HOTF_place.cdc"
+pub let battle = "../transactions/HOTF_battle.cdc"
 
 pub let blockchain = Test.newEmulatorBlockchain()
 pub let admin = blockchain.createAccount()
@@ -190,4 +192,75 @@ pub fun testGetHand3() {
     let returnValue: Int = scriptResult.returnValue! as! Int
     log(returnValue)
     Test.assertEqual(3, returnValue)
+}
+
+pub fun testGetBattlefield1() {
+    var script = Test.readFile(getBattlefield)
+    let scriptResult: Test.ScriptResult = blockchain.executeScript(script, [user.address])
+    Test.expect(scriptResult, Test.beSucceeded())
+    let returnValue: Int = scriptResult.returnValue! as! Int
+    log(returnValue)
+    Test.assertEqual(0, returnValue)
+}
+
+
+pub fun testPlace1() {//Place minion 0 in hand to battlefield 0
+    let code = Test.readFile(place)
+    let tx = Test.Transaction(
+        code: code,
+        authorizers: [user.address],
+        signers: [user],
+        arguments: [0,0]
+    )
+    let result = blockchain.executeTransaction(tx)
+}
+
+pub fun testGetBattlefield2() {
+    var script = Test.readFile(getBattlefield)
+    let scriptResult: Test.ScriptResult = blockchain.executeScript(script, [user.address])
+    Test.expect(scriptResult, Test.beSucceeded())
+    let returnValue: Int = scriptResult.returnValue! as! Int
+    log(returnValue)
+    Test.assertEqual(1, returnValue)
+}
+
+pub fun testPlace2() {//Place minion 0 in hand to battlefield 1
+    let code = Test.readFile(place)
+    let tx = Test.Transaction(
+        code: code,
+        authorizers: [user.address],
+        signers: [user],
+        arguments: [1,0]
+    )
+    let result = blockchain.executeTransaction(tx)
+}
+
+pub fun testGetBattlefield3() {
+    var script = Test.readFile(getBattlefield)
+    let scriptResult: Test.ScriptResult = blockchain.executeScript(script, [user.address])
+    Test.expect(scriptResult, Test.beSucceeded())
+    let returnValue: Int = scriptResult.returnValue! as! Int
+    log(returnValue)
+    Test.assertEqual(2, returnValue)
+}
+
+pub fun testBattle1() {
+    let code = Test.readFile(battle)
+    let tx = Test.Transaction(
+        code: code,
+        authorizers: [user.address],
+        signers: [user],
+        arguments: []
+    )
+    let result = blockchain.executeTransaction(tx)
+}
+pub fun testBattle2() {
+    let code = Test.readFile(battle)
+    let tx = Test.Transaction(
+        code: code,
+        authorizers: [user.address],
+        signers: [user],
+        arguments: []
+    )
+    let result = blockchain.executeTransaction(tx)
 }

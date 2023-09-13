@@ -18,7 +18,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "flow test cadence/tests/test_script.cdc",
+    "test": "flow test cadence/tests/test_HOTF.cdc cadence/tests/test_HOTFBattle.cdc",
+    "testBattle": "flow test cadence/tests/test_HOTFBattle.cdc",
     "update:testnet": "flow project deploy --network=testnet --update"
   },
   "dependencies": {

@@ -14,6 +14,9 @@ transaction(name: String) {
         refUserGameState = acct.borrow<&HOTF.UserGameState>(from: HOTF.UserGameStateStoragePath)
         acct.link<&HOTF.UserGameState{HOTF.UserGameStatePrivateInterface}>(HOTF.UserGameStatePrivatePath, target:HOTF.UserGameStateStoragePath)
         acct.link<&HOTF.UserGameState{HOTF.UserGameStatePublicInterface}>(HOTF.UserGameStatePublicPath, target:HOTF.UserGameStateStoragePath)
+        //Create game for new
+        //refUserGameState!.createGame()
+
       }else {
         log("User Account already exists:  ".concat(self.account.toString()))
       }

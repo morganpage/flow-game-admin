@@ -11,7 +11,6 @@ pub fun main(address:Address): [HOTF.Minion] {
     log("Public GameState Link borrow failed")
     return []
   }
-  //return refUserGameStateCap.borrow()!.mana
   let hand = refUserGameStateCap.borrow()!.hand
   return hand
 }
