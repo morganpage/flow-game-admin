@@ -11,8 +11,13 @@ transaction() {
       var team:UInt8 = 0
       let team1 = HOTFBattle.Team(name: "Friend")
       team1.addMinion(minion: HOTFBattle.Minion(name:"Mouse",attack:1,health:1,trigger:nil,ability:nil,item:nil,team:team))
+      team1.addMinion(minion: HOTFBattle.Minion(name:"Dog",attack:3,health:3,trigger:nil,ability:nil,item:nil,team:team))
+      team1.addMinion(minion: HOTFBattle.Minion(name:"Parrot",attack:1,health:1,trigger:HOTFBattle.Trigger.onStartBattle,ability:HOTFBattle.Ability.damageRandomEnemy,item:nil,team:team))
+
       let team2 = HOTFBattle.Team(name: "Enemy")
       team2.addMinion(minion: HOTFBattle.Minion(name:"Cat",attack:2,health:2,trigger:nil,ability:nil,item:nil,team:team))
+      team2.addMinion(minion: HOTFBattle.Minion(name:"Rat",attack:1,health:1,trigger:nil,ability:nil,item:nil,team:team))
+
       //BATTLE!
       let testBattle <- battleCreatorRef.createBattle(teams: [team1, team2 ])
       log("Start of Battle: ".concat(testBattle.toString()))
