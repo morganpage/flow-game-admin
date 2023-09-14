@@ -12,7 +12,6 @@ pub let user = blockchain.createAccount()
 pub fun setup() {
   log("HOTFBattle")
     blockchain.useConfiguration(Test.Configuration({
-        "HOTF": admin.address,
         "HOTFBattle": admin.address
     }))
     let err1 = blockchain.deployContract(
@@ -58,8 +57,9 @@ pub fun testBattle2(){
     )
     let result = blockchain.executeTransaction(tx)
     log(result)
-    Test.expect(result, Test.beFailed())
+    Test.expect(result, Test.beFailed())//Should fail, user is not admin
 }
+
 
 
 // pub fun testGetTeams() {

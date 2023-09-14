@@ -3,30 +3,23 @@ import "HOTFBattle"
 transaction() {
   //let account: Address
 
-    prepare(acct: AuthAccount)  {
+    prepare(acct: AuthAccount)  {//This will usually be done directly by the HOTF contract
       log("HOTFBattle Transaction: ".concat(acct.address.toString()))
-      let adminRef = acct.borrow<&HOTFBattle.BattleCreator>(from: HOTFBattle.BattleCreatorStoragePath) ?? panic("Not an admin!")
-      // self.account = acct.address
-      // log("Login User Account:  ".concat(self.account.toString()))
-      // var refUserGameState = acct.borrow<&HOTF.UserGameState>(from: HOTF.UserGameStateStoragePath)
-      // if refUserGameState == nil
-      // {
-      //   log("Creating User Account:  ".concat(self.account.toString()))
-      //   acct.save(<-HOTF.CreateUserGameState(name: name), to: HOTF.UserGameStateStoragePath)
-      //   refUserGameState = acct.borrow<&HOTF.UserGameState>(from: HOTF.UserGameStateStoragePath)
-      //   acct.link<&HOTF.UserGameState{HOTF.UserGameStatePrivateInterface}>(HOTF.UserGameStatePrivatePath, target:HOTF.UserGameStateStoragePath)
-      //   acct.link<&HOTF.UserGameState{HOTF.UserGameStatePublicInterface}>(HOTF.UserGameStatePublicPath, target:HOTF.UserGameStateStoragePath)
-      //   //Create game for new
-      //   //refUserGameState!.createGame()
-
-      // }else {
-      //   log("User Account already exists:  ".concat(self.account.toString()))
-      // }
-      // var userName = refUserGameState!.name
-      // log("User Name:  ".concat(userName))
+      //Get the battle creator reference, you must be an admin to do this
+      let battleCreatorRef = acct.borrow<&HOTFBattle.BattleCreator>(from: HOTFBattle.BattleCreatorStoragePath) ?? panic("Not an admin!")
+      //Create teams
+      var team:UInt8 = 0
+      let team1 = HOTFBattle.Team(name: "Friend")
+      team1.addMinion(minion: HOTFBattle.Minion(name:"Mouse",attack:1,health:1,trigger:nil,ability:nil,item:nil,team:team))
+      let team2 = HOTFBattle.Team(name: "Enemy")
+      team2.addMinion(minion: HOTFBattle.Minion(name:"Cat",attack:2,health:2,trigger:nil,ability:nil,item:nil,team:team))
+      //BATTLE!
+      let testBattle <- battleCreatorRef.createBattle(teams: [team1, team2 ])
+      log("Start of Battle: ".concat(testBattle.toString()))
+      testBattle.battle()
+      log("End of Battle: ".concat(testBattle.toString()))
+      destroy testBattle
     }
 
-    post {
-      // getAccount(self.account).getCapability<&HOTF.UserGameState{HOTF.UserGameStatePublicInterface}>(HOTF.UserGameStatePublicPath).check(): "Public GameState Link invalid"
-    }
+    post {}
 }
